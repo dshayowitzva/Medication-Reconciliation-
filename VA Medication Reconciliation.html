@@ -1,0 +1,1119 @@
+<!DOCTYPE html>
+<!-- saved from url=(0158)file:///C:/Users/VHABYNShayoD/OneDrive%20-%20Department%20of%20Veterans%20Affairs/Microsoft%20Teams%20Chat%20Files/VA%20med%20rec%20app%20version%201%201.html -->
+<html lang="en"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+  
+  <title>VA Medication Reconciliation</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <style>
+    * { box-sizing: border-box; font-family: "Segoe UI", Tahoma, sans-serif; }
+    body { margin: 0; padding: 20px; background: #f0f0f0; }
+    .container {
+      max-width: 1600px; margin: 0 auto; background: #fff;
+      border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+    .header {
+      background: linear-gradient(135deg,#0d47a1,#1565c0); color:#fff;
+      padding: 14px 20px; border-radius: 8px 8px 0 0;
+      display:flex; justify-content:space-between; align-items:center;
+    }
+    .header h1 { margin:0;font-size:1.4rem; }
+    .header-buttons button {
+      background:#ff5722;color:#fff;border:none;padding:6px 10px;border-radius:4px;
+      cursor:pointer;font-size:0.9rem;font-weight:600;
+    }
+    .header-buttons button:hover { background:#e64a19; }
+
+    .columns-container {
+      display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;
+      padding:16px;border-bottom:2px solid #e0e0e0;
+    }
+    .column {
+      background:#fafafa;border:1px solid #ddd;border-radius:8px;overflow:hidden;
+    }
+    .column-header {
+      padding:10px 12px;color:#fff;font-weight:600;
+      display:flex;justify-content:space-between;align-items:center;
+    }
+    .column-header.outpatient { background:#1976d2; }
+    .column-header.inpatient { background:#388e3c; }
+    .column-header.additional { background:#7b1fa2; }
+    .column-header button {
+      background:rgba(255,255,255,0.15);border:1px solid rgba(255,255,255,0.5);
+      color:#fff;padding:4px 10px;border-radius:4px;cursor:pointer;font-size:0.8rem;
+    }
+    .column-header button:hover { background:rgba(255,255,255,0.3); }
+
+    .paste-area { padding:8px; }
+    .paste-area textarea {
+      width:100%;min-height:110px;border:2px dashed #ccc;border-radius:4px;
+      padding:8px;font-family:"Courier New",monospace;font-size:0.8rem;resize:vertical;
+    }
+    .paste-area textarea:focus { outline:none;border-color:#1976d2; }
+
+    .med-list { max-height:280px;overflow-y:auto;padding:8px; }
+    .med-item {
+      display:flex;align-items:flex-start;padding:6px 8px;margin-bottom:6px;
+      border:1px solid #e0e0e0;border-radius:4px;background:#fff;cursor:pointer;
+    }
+    .med-item:hover { border-color:#1976d2; }
+    .med-item.selected { background:#e3f2fd;border-color:#1976d2; }
+    .med-item.matched { background:#fff3e0;border-left:4px solid #ff9800; }
+    .med-item.matched.selected { background:#ffe0b2; }
+    .med-item input[type=checkbox] {
+      margin-right:8px;margin-top:3px;transform:scale(1.1);
+    }
+    .med-info { flex:1; }
+    .med-name { font-weight:600;font-size:0.9rem;color:#333; }
+    .med-details { font-size:0.78rem;color:#666;margin-top:2px; }
+    .med-status {
+      font-size:0.7rem;padding:2px 6px;border-radius:10px;
+      background:#4caf50;color:#fff;margin-left:6px;white-space:nowrap;
+    }
+    .med-status.expired { background:#f44336; }
+    .med-status.new { background:#7b1fa2; }
+    .match-indicator {
+      background:#ff9800;color:#fff;font-size:0.7rem;
+      padding:1px 5px;border-radius:3px;margin-left:4px;
+    }
+
+    .add-med-form { padding:10px; }
+    .form-row { margin-bottom:8px; }
+    .form-row label {
+      display:block;font-size:0.8rem;font-weight:600;color:#555;margin-bottom:2px;
+    }
+    .form-row input, .form-row select {
+      width:100%;padding:6px 8px;border-radius:4px;border:1px solid #ccc;
+      font-size:0.85rem;
+    }
+    .form-row input:focus,.form-row select:focus {
+      outline:none;border-color:#7b1fa2;
+    }
+    .btn-add-med {
+      width:100%;background:#7b1fa2;color:#fff;border:none;
+      padding:8px;border-radius:4px;cursor:pointer;font-weight:600;
+      font-size:0.9rem;
+    }
+    .btn-add-med:hover { background:#6a1b9a; }
+
+    .action-bar {
+      padding:10px 16px;border-bottom:2px solid #e0e0e0;
+      background:#f5f5f5;display:flex;gap:10px;flex-wrap:wrap;
+      justify-content:center;
+    }
+    .action-bar button {
+      border:none;border-radius:4px;padding:8px 14px;cursor:pointer;
+      font-size:0.9rem;font-weight:600;
+    }
+    .btn-match { background:#ff9800;color:#fff; }
+    .btn-match:hover { background:#f57c00; }
+    .btn-continue { background:#4caf50;color:#fff; }
+    .btn-generate { background:#9c27b0;color:#fff; }
+    .btn-generate:hover { background:#7b1fa2; }
+
+    .final-section { padding:16px; }
+    .instructions {
+      background:#e3f2fd;border:1px solid #90caf9;border-radius:6px;
+      padding:10px 12px;margin-bottom:10px;font-size:0.85rem;
+    }
+    .instructions h4 { margin:0 0 6px 0;font-size:0.9rem;color:#1565c0; }
+    .instructions ol { margin:0;padding-left:18px; }
+    .instructions li { margin-bottom:3px; }
+
+    .final-header {
+      display:flex;justify-content:space-between;align-items:center;
+      flex-wrap:wrap;gap:8px;margin-bottom:10px;
+    }
+    .final-header h2 { margin:0;font-size:1.1rem; }
+    .final-actions { display:flex;gap:8px;flex-wrap:wrap; }
+    .final-actions button {
+      border:none;border-radius:4px;padding:6px 10px;cursor:pointer;
+      font-size:0.85rem;font-weight:600;color:#fff;
+    }
+    .btn-export { background:#4caf50; }
+    .btn-export-active { background:#1976d2; }
+    .btn-print { background:#607d8b; }
+    .btn-clear-final { background:#f44336; }
+
+    .final-categories { display:flex;flex-direction:column;gap:14px; }
+    .category { border:1px solid #ddd;border-radius:6px;overflow:hidden; }
+    .category-header {
+      padding:8px 10px;color:#fff;font-weight:600;
+      display:flex;justify-content:space-between;align-items:center;
+      font-size:0.9rem;
+    }
+    .category-header.continue { background:#4caf50; }
+    .category-header.start { background:#2196f3; }
+    .category-header.stop { background:#f44336; }
+    .category-list { padding:8px;min-height:50px;background:#fafafa; }
+    .final-med-item {
+      display:flex;align-items:center;padding:7px 8px;margin-bottom:6px;
+      border-radius:4px;border:1px solid #e0e0e0;background:#fff;cursor:grab;
+    }
+    .drag-handle { color:#999;margin-right:8px; }
+    .final-med-number {
+      width:22px;height:22px;border-radius:50%;background:#333;color:#fff;
+      display:flex;align-items:center;justify-content:center;
+      font-size:0.75rem;margin-right:8px;flex-shrink:0;
+    }
+    .final-med-info { flex:1; }
+    .final-med-name { font-weight:600;font-size:0.9rem; }
+    .final-med-details { font-size:0.8rem;color:#666; }
+    .final-med-actions { display:flex;gap:4px; }
+    .final-med-actions button {
+      border:1px solid #ddd;background:#fff;border-radius:3px;
+      padding:3px 6px;font-size:0.75rem;cursor:pointer;
+    }
+
+    .empty-state {
+      text-align:center;padding:20px;font-size:0.85rem;color:#999;
+    }
+    .empty-state-icon { font-size:1.6rem;margin-bottom:4px; }
+
+    .modal-overlay {
+      display:none;position:fixed;top:0;left:0;width:100%;height:100%;
+      background:rgba(0,0,0,0.6);z-index:1000;
+      justify-content:center;align-items:center;
+    }
+    .modal-overlay.active { display:flex; }
+    .modal-box {
+      background:#fff;border-radius:8px;max-width:90%;width:600px;
+      max-height:90vh;overflow:hidden;box-shadow:0 8px 30px rgba(0,0,0,0.35);
+    }
+    .modal-header {
+      padding:10px 14px;color:#fff;display:flex;justify-content:space-between;
+      align-items:center;
+    }
+    .modal-header.edit-header {
+      background:linear-gradient(135deg,#7b1fa2,#6a1b9a);
+    }
+    .modal-header.export-header {
+      background:linear-gradient(135deg,#388e3c,#2e7d32);
+    }
+    .modal-header.active-header {
+      background:linear-gradient(135deg,#1976d2,#1565c0);
+    }
+    .modal-header h3 { margin:0;font-size:1rem; }
+    .modal-close {
+      background:rgba(255,255,255,0.2);border:none;color:#fff;
+      width:30px;height:30px;border-radius:50%;cursor:pointer;
+      font-size:1.2rem;
+    }
+    .modal-body { padding:12px;max-height:60vh;overflow-y:auto; }
+    .modal-footer {
+      padding:8px 12px;background:#f5f5f5;display:flex;justify-content:flex-end;gap:6px;
+    }
+    .modal-footer button {
+      border:none;border-radius:4px;padding:6px 10px;cursor:pointer;
+      font-size:0.85rem;font-weight:600;color:#fff;
+    }
+    .btn-modal-save { background:#4caf50; }
+    .btn-modal-cancel { background:#9e9e9e; }
+    .btn-modal-copy { background:#1976d2; }
+
+    .export-textarea {
+      width:100%;height:360px;font-family:"Courier New",monospace;
+      font-size:0.8rem;border-radius:4px;border:1px solid #ccc;
+      padding:6px;resize:vertical;white-space:pre;
+    }
+
+    @media print {
+      .header-buttons,.action-bar,.final-actions,.final-med-actions,
+      .columns-container,.instructions { display:none !important; }
+      body { background:#fff;padding:0; }
+      .container { box-shadow:none;border-radius:0; }
+    }
+  </style>
+</head>
+<body>
+<div class="container">
+  <div class="header">
+    <h1>VA Medication Reconciliation</h1>
+    <div class="header-buttons">
+      <button onclick="clearAll()">Clear All</button>
+    </div>
+  </div>
+
+  <div class="columns-container">
+    <!-- OUTPATIENT FIRST -->
+    <div class="column">
+      <div class="column-header outpatient">
+        <span>Outpatient Meds</span>
+        <button onclick="parseMeds(&#39;outpatient&#39;)">Parse Meds</button>
+      </div>
+      <div class="paste-area">
+        <textarea id="outpatientPaste" placeholder="Paste OUTPATIENT list (1) MED ...)"></textarea>
+      </div>
+      <div class="med-list" id="outpatientList"><div class="empty-state"><div class="empty-state-icon">📋</div>No medications parsed yet</div></div>
+    </div>
+
+    <!-- INPATIENT -->
+    <div class="column">
+      <div class="column-header inpatient">
+        <span>Inpatient Meds</span>
+        <button onclick="parseMeds(&#39;inpatient&#39;)">Parse Meds</button>
+      </div>
+      <div class="paste-area">
+        <textarea id="inpatientPaste" placeholder="Paste INPATIENT list (1) MED ...)"></textarea>
+      </div>
+      <div class="med-list" id="inpatientList"><div class="empty-state"><div class="empty-state-icon">📋</div>No medications parsed yet</div></div>
+    </div>
+
+    <!-- ADDITIONAL -->
+    <div class="column">
+      <div class="column-header additional">
+        <span>Additional Meds</span>
+      </div>
+      <div class="add-med-form">
+        <div class="form-row">
+          <label>Medication Name</label>
+          <input type="text" id="addMedName">
+        </div>
+        <div class="form-row">
+          <label>Dose</label>
+          <input type="text" id="addDose">
+        </div>
+        <div class="form-row">
+          <label>Route</label>
+          <select id="addRoute">
+            <option value="PO">PO (By Mouth)</option>
+            <option value="IV">IV</option>
+            <option value="IM">IM</option>
+            <option value="SC">SC/SQ</option>
+            <option value="Topical">Topical/External</option>
+            <option value="Ophthalmic">Ophthalmic</option>
+            <option value="Otic">Otic</option>
+            <option value="Nasal">Nasal</option>
+            <option value="Inhaled">Inhaled</option>
+            <option value="Rectal">Rectal</option>
+            <option value="Feeding Tube">Feeding Tube</option>
+            <option value="J-Tube">J-Tube</option>
+            <option value="G-Tube">G-Tube</option>
+            <option value="NG Tube">NG Tube</option>
+            <option value="IVPB">IVPB</option>
+          </select>
+        </div>
+        <div class="form-row">
+          <label>Frequency</label>
+          <select id="addFrequency">
+            <option value="Daily">Daily</option>
+            <option value="BID">BID</option>
+            <option value="TID">TID</option>
+            <option value="QID">QID</option>
+            <option value="Q4H">Q4H</option>
+            <option value="Q6H">Q6H</option>
+            <option value="Q8H">Q8H</option>
+            <option value="Q12H">Q12H</option>
+            <option value="Q72H">Q72H</option>
+            <option value="QHS">QHS</option>
+            <option value="PRN">PRN</option>
+            <option value="Weekly">Weekly</option>
+            <option value="Once">Once</option>
+          </select>
+        </div>
+        <div class="form-row">
+          <label>Indication</label>
+          <input type="text" id="addInstructions" placeholder="FOR ...">
+        </div>
+        <button class="btn-add-med" onclick="addAdditionalMed()">+ Add Medication</button>
+      </div>
+      <div class="med-list" id="additionalList"><div class="empty-state"><div class="empty-state-icon">📋</div>No medications parsed yet</div></div>
+    </div>
+  </div>
+
+  <div class="action-bar">
+    <button class="btn-match" onclick="matchMeds()">Match Similar Meds</button>
+    <button class="btn-continue" onclick="addToFinal(&#39;Continue Taking&#39;)">Add Selected → Continue</button>
+    <button class="btn-generate" onclick="generateFinalList()">Generate Final List</button>
+  </div>
+
+  <div class="final-section">
+    <div class="instructions">
+      <h4>How to Use</h4>
+      <ol>
+        <li>Paste and “Parse Meds” for OUTPATIENT and INPATIENT lists.</li>
+        <li>Click <strong>Match Similar Meds</strong> to link same drugs (VA vs Non‑VA).</li>
+        <li>Select OUTPATIENT meds to continue; select non‑matched INPATIENT meds to start.</li>
+        <li>Use Additional Meds for new meds (auto start).</li>
+        <li>Click <strong>Generate Final List</strong>:
+          <ul>
+            <li>Selected OUTPATIENT → Continue Taking</li>
+            <li>Selected INPATIENT (non‑matched) + Additional → Start Taking</li>
+            <li>Unselected ACTIVE OUTPATIENT → Stop Taking</li>
+          </ul>
+        </li>
+      </ol>
+    </div>
+
+    <div class="final-header">
+      <h2>Final Medication List</h2>
+      <div class="final-actions">
+        <button class="btn-export" onclick="openExportModal()">Export Reconciliation</button>
+        <button class="btn-export-active" onclick="openExportActiveModal()">Export Active (CPRS)</button>
+        <button class="btn-print" onclick="window.print()">Print</button>
+        <button class="btn-clear-final" onclick="clearFinalList()">Clear Final</button>
+      </div>
+    </div>
+
+    <div class="final-categories">
+      <div class="category">
+        <div class="category-header continue">
+          <span>Continue Taking</span>
+          <span id="continueCount">0 medications</span>
+        </div>
+        <div class="category-list" id="continueList" ondragover="allowDrop(event)" ondrop="drop(event,&#39;Continue Taking&#39;)"><div class="empty-state"><div class="empty-state-icon">💊</div>No medications added yet</div></div>
+      </div>
+
+      <div class="category">
+        <div class="category-header start">
+          <span>Start Taking</span>
+          <span id="startCount">0 medications</span>
+        </div>
+        <div class="category-list" id="startList" ondragover="allowDrop(event)" ondrop="drop(event,&#39;Start Taking&#39;)"><div class="empty-state"><div class="empty-state-icon">💊</div>No medications added yet</div></div>
+      </div>
+
+      <div class="category">
+        <div class="category-header stop">
+          <span>Stop Taking</span>
+          <span id="stopCount">0 medications</span>
+        </div>
+        <div class="category-list" id="stopList" ondragover="allowDrop(event)" ondrop="drop(event,&#39;Stop Taking&#39;)"><div class="empty-state"><div class="empty-state-icon">💊</div>No medications added yet</div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Edit Modal -->
+<div class="modal-overlay" id="editModal">
+  <div class="modal-box">
+    <div class="modal-header edit-header">
+      <h3>Edit Medication</h3>
+      <button class="modal-close" onclick="closeEditModal()">×</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-row">
+        <label>Medication Name</label>
+        <input type="text" id="editMedName">
+      </div>
+      <div class="form-row">
+        <label>Dose</label>
+        <input type="text" id="editDose">
+      </div>
+      <div class="form-row">
+        <label>Route</label>
+        <select id="editRoute">
+          <option value="PO">PO (By Mouth)</option>
+          <option value="IV">IV</option>
+          <option value="IM">IM</option>
+          <option value="SC">SC/SQ</option>
+          <option value="Topical">Topical/External</option>
+          <option value="Ophthalmic">Ophthalmic</option>
+          <option value="Otic">Otic</option>
+          <option value="Nasal">Nasal</option>
+          <option value="Inhaled">Inhaled</option>
+          <option value="Rectal">Rectal</option>
+          <option value="Feeding Tube">Feeding Tube</option>
+          <option value="J-Tube">J-Tube</option>
+          <option value="G-Tube">G-Tube</option>
+          <option value="NG Tube">NG Tube</option>
+          <option value="IVPB">IVPB</option>
+        </select>
+      </div>
+      <div class="form-row">
+        <label>Frequency</label>
+        <select id="editFrequency">
+          <option value="Daily">Daily</option>
+          <option value="BID">BID</option>
+          <option value="TID">TID</option>
+          <option value="QID">QID</option>
+          <option value="Q4H">Q4H</option>
+          <option value="Q6H">Q6H</option>
+          <option value="Q8H">Q8H</option>
+          <option value="Q12H">Q12H</option>
+          <option value="Q72H">Q72H</option>
+          <option value="QHS">QHS</option>
+          <option value="PRN">PRN</option>
+          <option value="Weekly">Weekly</option>
+          <option value="Once">Once</option>
+        </select>
+      </div>
+      <div class="form-row">
+        <label>Category</label>
+        <select id="editCategory">
+          <option value="Continue Taking">Continue Taking</option>
+          <option value="Start Taking">Start Taking</option>
+          <option value="Stop Taking">Stop Taking</option>
+        </select>
+      </div>
+      <div class="form-row">
+        <label>Indication</label>
+        <input type="text" id="editInstructions">
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-modal-cancel" onclick="closeEditModal()">Cancel</button>
+      <button class="btn-modal-save" onclick="saveEdit()">Save</button>
+    </div>
+  </div>
+</div>
+
+<!-- Export Reconciliation Modal -->
+<div class="modal-overlay" id="exportModal">
+  <div class="modal-box">
+    <div class="modal-header export-header">
+      <h3>Export Medication Reconciliation</h3>
+      <button class="modal-close" onclick="closeExportModal()">×</button>
+    </div>
+    <div class="modal-body">
+      <textarea id="exportText" class="export-textarea" readonly=""></textarea>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-modal-cancel" onclick="closeExportModal()">Close</button>
+      <button class="btn-modal-copy" onclick="copyExport()">Copy</button>
+    </div>
+  </div>
+</div>
+
+<!-- Export Active CPRS Modal -->
+<div class="modal-overlay" id="exportActiveModal">
+  <div class="modal-box" style="width:820px;">
+    <div class="modal-header active-header">
+      <h3>Active Medications (CPRS-style)</h3>
+      <button class="modal-close" onclick="closeExportActiveModal()">×</button>
+    </div>
+    <div class="modal-body">
+      <textarea id="exportActiveText" class="export-textarea" readonly=""></textarea>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-modal-cancel" onclick="closeExportActiveModal()">Close</button>
+      <button class="btn-modal-copy" onclick="copyExportActive()">Copy</button>
+    </div>
+  </div>
+</div>
+
+<script>
+  var inpatientMeds = [];
+  var outpatientMeds = [];
+  var additionalMeds = [];
+  var finalMedList = [];
+  var matchCounter = 1;
+  var editingId = null;
+  var draggedItem = null;
+
+  // --- PARSE (VA + Non-VA) ---
+  function parseMeds(type) {
+    var textarea = document.getElementById(type + 'Paste');
+    var text = textarea.value;
+    var lines = text.split('\n');
+    var meds = [];
+    var currentMed = null;
+    var currentText = '';
+
+    lines.forEach(function(line) {
+      var match = line.match(/^\s*(\d+)\)\s+(.+)/);
+      if (match) {
+        if (currentMed !== null) meds.push(parseMedLine(currentText, meds.length));
+        currentMed = match[1];
+        currentText = match[2];
+      } else if (currentMed !== null && line.trim()) {
+        currentText += ' ' + line.trim();
+      }
+    });
+    if (currentMed !== null) meds.push(parseMedLine(currentText, meds.length));
+
+    if (type === 'inpatient') inpatientMeds = meds;
+    else outpatientMeds = meds;
+
+    renderMedList(type);
+  }
+
+  function parseMedLine(text, index) {
+    var original = text.trim();
+    var medName = '';
+    var dose = '';
+    var route = 'PO';
+    var frequency = 'Daily';
+    var status = 'Active';
+    var instructions = original;
+    var indication = '';
+
+    // ----- 1. Extract Indication (if present) -----
+    var indicationMatch = original.match(/Indication:\s*(.+?)(?:\s*$)/i);
+    if (indicationMatch) {
+      indication = indicationMatch[1].trim();
+      original = original.replace(indicationMatch[0], '').trim();
+      instructions = original;
+    }
+
+    var up = original.toUpperCase();
+
+    // ----- 2. SPECIAL HANDLING: Non-VA meds -----
+    if (up.startsWith('NON-VA ')) {
+      original = original.replace(/\b(ACTIVE|EXPIRED)\b\s*$/i, '').trim();
+      up = original.toUpperCase();
+
+      var nonVaPrefix = 'Non-VA ';
+      var afterPrefix = original.substring(nonVaPrefix.length).trim();
+
+      var dirIdx = afterPrefix.search(/\s(BY MOUTH|DROP|EVERY\s+\d+|PRN|DAILY|INHL,ORAL)\b/i);
+      var coreNamePart, dirPart;
+      if (dirIdx > 0) {
+        coreNamePart = afterPrefix.substring(0, dirIdx).trim();
+        dirPart = afterPrefix.substring(dirIdx).trim();
+      } else {
+        coreNamePart = afterPrefix;
+        dirPart = '';
+      }
+
+      var coreUp = coreNamePart.toUpperCase();
+      var doseTokens = coreUp.match(/\d+\s*\/?\s*\d*\s*(MG|MCG|ML|G|GM|UNIT|UNT|%)/g);
+      if (doseTokens && doseTokens.length > 1) {
+        coreNamePart = coreNamePart.replace(/\s*\d+\s*\/?\s*\d*\s*(MG|MCG|ML|G|GM|UNIT|UNT|%)(\s*)$/i, '').trim();
+      }
+
+      medName = nonVaPrefix + coreNamePart;
+
+      var doseMatchNonVa = original.match(/(\d+\s*\/?\s*\d*\s*(MG|MCG|ML|G|GM|UNIT|UNT|%))/i);
+      if (doseMatchNonVa) dose = doseMatchNonVa[1];
+
+      var dirString = dirPart || original;
+      var dirUp = dirString.toUpperCase();
+
+      if (dirUp.includes('BY MOUTH') || dirUp.includes(' PO ')) route = 'PO';
+      else if (dirUp.includes('OPH') || dirUp.includes(' DROP')) route = 'Ophthalmic';
+      else if (dirUp.includes('INHL') || dirUp.includes('INHALATION')) route = 'Inhaled';
+      else if (dirUp.includes('IVPB')) route = 'IVPB';
+      else if (dirUp.includes(' IV ') || dirUp.includes(' INTRAVENOUS')) route = 'IV';
+      else if (dirUp.includes('PATCH') || dirUp.includes('EXTERNALLY') || dirUp.includes('TOPICALLY')) route = 'Topical';
+
+      if (dirUp.includes('EVERY 7 DAYS') || dirUp.includes('Q7D')) frequency = 'Q7D';
+      else if (dirUp.includes('TWICE A DAY') || dirUp.includes('Q12H') || dirUp.includes(' BID')) frequency = 'BID';
+      else if (dirUp.includes('THREE TIMES') || dirUp.includes(' TID') || dirUp.includes('Q8H')) frequency = 'TID';
+      else if (dirUp.includes('FOUR TIMES') || dirUp.includes('QID') || dirUp.includes('Q6H')) frequency = 'QID';
+      else if (dirUp.includes('Q4H')) frequency = 'Q4H';
+      else if (dirUp.includes(' AT BEDTIME') || /\sHS\b/.test(dirUp) || dirUp.includes('QHS')) frequency = 'QHS';
+      else if (dirUp.includes('PRN') || dirUp.includes('AS NEEDED')) frequency = 'PRN';
+      else if (dirUp.includes('DAILY') || dirUp.includes(' QD')) frequency = 'Daily';
+
+      if (up.includes('EXPIRED')) status = 'Expired';
+      else if (up.includes('ACTIVE')) status = 'Active';
+
+      instructions = text.trim();
+
+      var tokens = medName.split(/\s+/);
+      var base = '';
+      for (var t = 0; t < tokens.length; t++) {
+        if (/^NON-VA$/i.test(tokens[t])) continue;
+        base = tokens[t];
+        break;
+      }
+      var baseName = base.toUpperCase().replace(/[^A-Z/]/g,'');
+
+      return {
+        id: Date.now() + Math.random() + index,
+        medName: medName,
+        dose: dose,
+        route: route,
+        frequency: frequency,
+        instructions: instructions,
+        indication: indication,
+        status: status,
+        selected: false,
+        matchGroup: 0,
+        baseName: baseName
+      };
+    }
+
+    // ----- 3. VA-style / generic meds (improved for combo meds) -----
+
+    // Remove trailing ACTIVE / EXPIRED for parsing name, but keep in original up
+    original = original.replace(/\b(ACTIVE|EXPIRED)\b\s*$/i, '').trim();
+    up = original.toUpperCase();
+
+    // We want:
+    // FLUTICASONE/SALMETEROL 500/50MCG POWDER 1 INHALATION
+    // AMLODIPINE-BENAZEPRIL 5-20MG CAP
+    // etc.
+    //
+    // Strategy:
+    //  - Capture words from the start until we hit a "direction" cue like BY, TAKE, INJECT, EVERY, etc.
+    //  - That captured chunk is the medName.
+    var dirCueRegex = /\s(BY\s+MOUTH|TAKE\b|INJECT\b|EVERY\s+\d+|Q\d+H|PRN\b|DAILY\b|INHL,ORAL|INHALATION\b)/i;
+    var dirPos = original.search(dirCueRegex);
+    var nameChunk = dirPos > 0 ? original.substring(0, dirPos).trim() : original;
+
+    // Clean up spacing
+    nameChunk = nameChunk.replace(/\s+/g,' ');
+
+    // If nameChunk is still very short (1 word), fall back to old heuristic
+    if (nameChunk.split(' ').length <= 1) {
+      var medMatchFallback = original.match(/^([A-Z][A-Z0-9\s\-\/,.\(\)\*]+)/i);
+      medName = medMatchFallback ? medMatchFallback[1].trim().replace(/\s+/g,' ') : original.split(' ').slice(0,4).join(' ');
+    } else {
+      medName = nameChunk;
+    }
+
+    // Now pick up dose (allowing combos like 500/50MCG)
+    var doseMatch = original.match(/(\d+\s*\/?\s*\d*\s*(MG|MCG|ML|UNIT|UNT|%|GM|G)\b)/i);
+    if (doseMatch) dose = doseMatch[1];
+
+    // Route (VA/general)
+    if (up.includes('BY MOUTH') || up.includes(' PO ')) route = 'PO';
+    else if (up.includes('INHL,ORAL') || up.includes('INHALATION')) route = 'Inhaled';
+    else if (up.includes('IVPB')) route = 'IVPB';
+    else if (up.includes(' IV ') || up.includes(' IV,') || up.includes('INTRAVENOUS')) route = 'IV';
+    else if (up.includes('INSTILL') || up.includes('SOLN,OPH') || up.includes(' OU ') || up.includes(' OPH')) route = 'Ophthalmic';
+    else if (up.includes('EXTERNALLY') || up.includes('TOPICALLY') || up.includes('PATCH')) route = 'Topical';
+    else if (up.includes('J-TUBE') || up.includes('J TUBE') || up.includes('JTUBE') || up.includes(' VIA J')) route = 'J-Tube';
+    else if (up.includes('G-TUBE') || up.includes('G TUBE') || up.includes('GTUBE')) route = 'G-Tube';
+    else if (up.includes('NGT') || up.includes('NG TUBE')) route = 'NG Tube';
+    else if (up.includes('FEEDING TUBE') || up.includes(' VFT')) route = 'Feeding Tube';
+    else if (up.includes(' SC ') || up.includes(' SQ ') || up.includes('SUBCUTANEOUS')) route = 'SC';
+    else if (up.includes(' INJ') || up.includes('INJECT')) route = 'Injectable';
+    else if (up.includes('SPRAY,NASAL') || up.includes(' NOSTRIL') || up.includes(' NU ')) route = 'Nasal';
+    else if (up.includes(' IM ') || up.includes('INTRAMUSCULAR')) route = 'IM';
+
+    // Frequency (VA/general)
+    if (up.includes('EVERY 7 DAYS') || up.includes('Q7D')) frequency = 'Q7D';
+    else if (up.includes('Q12H') || up.includes('TWICE A DAY') || up.includes('TWO TIMES')) frequency = 'BID';
+    else if (up.includes('Q8H') || up.includes('THREE TIMES')) frequency = 'TID';
+    else if (up.includes('Q6H') || up.includes('FOUR TIMES')) frequency = 'QID';
+    else if (up.includes('Q4H')) frequency = 'Q4H';
+    else if (up.includes('Q72H')) frequency = 'Q72H';
+    else if (up.includes('QHS') || up.includes('AT BEDTIME') || /\sHS\b/.test(up)) frequency = 'QHS';
+    else if (up.includes(' PRN') || up.includes('AS NEEDED')) frequency = 'PRN';
+    else if (up.includes('QID')) frequency = 'QID';
+    else if (up.includes(' TID')) frequency = 'TID';
+    else if (up.includes(' BID')) frequency = 'BID';
+    else if (up.includes('DAILY') || up.includes(' QD')) frequency = 'Daily';
+
+    if (up.includes('EXPIRED')) status = 'Expired';
+    else if (up.includes('ACTIVE')) status = 'Active';
+
+    instructions = text.trim();
+
+    var baseNameGeneric = medName.split(' ')[0].toUpperCase().replace(/[^A-Z/]/g,'');
+
+    return {
+      id: Date.now() + Math.random() + index,
+      medName: medName,
+      dose: dose,
+      route: route,
+      frequency: frequency,
+      instructions: instructions,
+      indication: indication,
+      status: status,
+      selected: false,
+      matchGroup: 0,
+      baseName: baseNameGeneric
+    };
+  }  function renderMedList(type) {
+    var meds, listEl;
+    if (type === 'inpatient') { meds = inpatientMeds; listEl = document.getElementById('inpatientList'); }
+    else if (type === 'outpatient') { meds = outpatientMeds; listEl = document.getElementById('outpatientList'); }
+    else { meds = additionalMeds; listEl = document.getElementById('additionalList'); }
+
+    if (!meds.length) {
+      listEl.innerHTML = '<div class="empty-state"><div class="empty-state-icon">📋</div>No medications parsed yet</div>';
+      return;
+    }
+    var html = '';
+    meds.forEach(function(med) {
+      var sel = med.selected ? 'selected' : '';
+      var match = med.matchGroup > 0 ? 'matched' : '';
+      var chk = med.selected ? 'checked' : '';
+      var scls = med.status === 'Expired' ? 'expired' : (med.status === 'New' ? 'new' : '');
+      var mint = med.matchGroup > 0 ? '<span class="match-indicator">Match '+med.matchGroup+'</span>' : '';
+      html += '<div class="med-item '+sel+' '+match+'" onclick="toggleSelect(\''+type+'\',\''+med.id+'\')">';
+      html += '<input type="checkbox" '+chk+' onclick="event.stopPropagation();toggleSelect(\''+type+'\',\''+med.id+'\')">';
+      html += '<div class="med-info"><div class="med-name">'+med.medName+mint+'</div>';
+      html += '<div class="med-details">'+med.route+' | '+med.frequency+'</div></div>';
+      html += '<span class="med-status '+scls+'">'+med.status+'</span></div>';
+    });
+    listEl.innerHTML = html;
+  }
+
+  function toggleSelect(type, id) {
+    var meds = type==='inpatient' ? inpatientMeds : (type==='outpatient'?outpatientMeds:additionalMeds);
+    var med = meds.find(function(m){ return String(m.id)===String(id); });
+    if (!med) return;
+    med.selected = !med.selected;
+
+    if (med.matchGroup>0) {
+      if (type==='inpatient') {
+        outpatientMeds.forEach(function(m){ if(m.matchGroup===med.matchGroup)m.selected=med.selected; });
+      } else if (type==='outpatient') {
+        inpatientMeds.forEach(function(m){ if(m.matchGroup===med.matchGroup)m.selected=med.selected; });
+      }
+      renderMedList('inpatient');
+      renderMedList('outpatient');
+    } else {
+      renderMedList(type);
+    }
+  }
+
+  function addAdditionalMed() {
+    var name = document.getElementById('addMedName').value.trim();
+    var dose = document.getElementById('addDose').value.trim();
+    var route = document.getElementById('addRoute').value;
+    var freq = document.getElementById('addFrequency').value;
+    var instr = document.getElementById('addInstructions').value.trim();
+    if (!name) { alert('Enter a medication name'); return; }
+
+    additionalMeds.push({
+      id: Date.now()+Math.random(),
+      medName: name + (dose?' '+dose:''),
+      dose: dose,
+      route: route,
+      frequency: freq,
+      instructions: instr,
+      indication: instr,
+      status: 'New',
+      selected: true,
+      matchGroup: 0,
+      baseName: name.split(' ')[0].toUpperCase().replace(/[^A-Z]/g,'')
+    });
+
+    document.getElementById('addMedName').value='';
+    document.getElementById('addDose').value='';
+    document.getElementById('addInstructions').value='';
+    renderMedList('additional');
+  }
+
+  function matchMeds() {
+    matchCounter=1;
+    inpatientMeds.forEach(m=>m.matchGroup=0);
+    outpatientMeds.forEach(m=>m.matchGroup=0);
+
+    outpatientMeds.forEach(function(outMed){
+      if (outMed.matchGroup>0 || outMed.baseName.length<3) return;
+      var inMed = inpatientMeds.find(function(im){ return im.matchGroup===0 && im.baseName===outMed.baseName && im.baseName.length>=3; });
+      if (inMed) {
+        outMed.matchGroup = matchCounter;
+        inMed.matchGroup = matchCounter;
+        matchCounter++;
+      }
+    });
+
+    renderMedList('inpatient');
+    renderMedList('outpatient');
+    var n = matchCounter-1;
+    alert(n ? ('Found '+n+' matched medication pair(s).') : 'No matching meds found.');
+  }
+
+  function addToFinal(category) {
+    var selected = []
+      .concat(inpatientMeds.filter(m=>m.selected))
+      .concat(outpatientMeds.filter(m=>m.selected))
+      .concat(additionalMeds.filter(m=>m.selected));
+
+    if (!selected.length) { alert('Select some medications first'); return; }
+
+    var seenGroups = {};
+    selected.forEach(function(med){
+      if (med.matchGroup>0) {
+        if (seenGroups[med.matchGroup]) return;
+        seenGroups[med.matchGroup] = true;
+      }
+      finalMedList.push({
+        id: Date.now()+Math.random(),
+        medName: med.medName,
+        dose: med.dose,
+        route: med.route,
+        frequency: med.frequency,
+        instructions: med.instructions,
+        indication: med.indication || med.instructions,
+        category: category,
+        sortOrder: finalMedList.filter(x=>x.category===category).length+1
+      });
+    });
+    renderFinalList();
+  }
+
+  function generateFinalList() {
+    finalMedList = [];
+    var processed = {};
+
+    // Selected OUTPATIENT → Continue
+    outpatientMeds.filter(m=>m.selected).forEach(function(med){
+      if (med.matchGroup>0 && processed[med.matchGroup]) return;
+      if (med.matchGroup>0) processed[med.matchGroup]=true;
+      finalMedList.push({
+        id: Date.now()+Math.random(),
+        medName: med.medName,
+        dose: med.dose,
+        route: med.route,
+        frequency: med.frequency,
+        instructions: med.instructions,
+        indication: med.indication||'',
+        category: 'Continue Taking',
+        sortOrder: finalMedList.filter(x=>x.category==='Continue Taking').length+1
+      });
+    });
+
+    // Selected INPATIENT NOT matched → Start
+    inpatientMeds.filter(m=>m.selected && !m.matchGroup).forEach(function(med){
+      finalMedList.push({
+        id: Date.now()+Math.random(),
+        medName: med.medName,
+        dose: med.dose,
+        route: med.route,
+        frequency: med.frequency,
+        instructions: med.instructions,
+        indication: med.indication||'',
+        category: 'Start Taking',
+        sortOrder: finalMedList.filter(x=>x.category==='Start Taking').length+1
+      });
+    });
+
+    // Additional → Start
+    additionalMeds.forEach(function(med){
+      finalMedList.push({
+        id: Date.now()+Math.random(),
+        medName: med.medName,
+        dose: med.dose,
+        route: med.route,
+        frequency: med.frequency,
+        instructions: med.instructions,
+        indication: med.indication||med.instructions,
+        category: 'Start Taking',
+        sortOrder: finalMedList.filter(x=>x.category==='Start Taking').length+1
+      });
+    });
+
+    // Unselected ACTIVE outpatient → Stop
+    outpatientMeds.filter(m=>!m.selected && m.status==='Active').forEach(function(med){
+      if (med.matchGroup>0 && processed[med.matchGroup]) return;
+      finalMedList.push({
+        id: Date.now()+Math.random(),
+        medName: med.medName,
+        dose: med.dose,
+        route: med.route,
+        frequency: med.frequency,
+        instructions: med.instructions,
+        indication: med.indication||'',
+        category: 'Stop Taking',
+        sortOrder: finalMedList.filter(x=>x.category==='Stop Taking').length+1
+      });
+    });
+
+    renderFinalList();
+    var c=finalMedList.filter(x=>x.category==='Continue Taking').length;
+    var s=finalMedList.filter(x=>x.category==='Start Taking').length;
+    var st=finalMedList.filter(x=>x.category==='Stop Taking').length;
+    alert('Final List Generated:\nContinue: '+c+'\nStart: '+s+'\nStop: '+st);
+  }
+
+  function renderFinalList() {
+    ['Continue Taking','Start Taking','Stop Taking'].forEach(function(cat){
+      var listId = cat==='Continue Taking'?'continueList':(cat==='Start Taking'?'startList':'stopList');
+      var countId = cat==='Continue Taking'?'continueCount':(cat==='Start Taking'?'startCount':'stopCount');
+      var meds = finalMedList.filter(m=>m.category===cat).sort((a,b)=>a.sortOrder-b.sortOrder);
+      document.getElementById(countId).textContent = meds.length+' medication'+(meds.length!==1?'s':'');
+
+      var list = document.getElementById(listId);
+      if (!meds.length) {
+        list.innerHTML = '<div class="empty-state"><div class="empty-state-icon">💊</div>No medications added yet</div>';
+        return;
+      }
+      var html='';
+      meds.forEach(function(med,idx){
+        html+='<div class="final-med-item" draggable="true" ondragstart="drag(event,\''+med.id+'\')">';
+        html+='<span class="drag-handle">☰</span>';
+        html+='<span class="final-med-number">'+(idx+1)+'</span>';
+        html+='<div class="final-med-info"><div class="final-med-name">'+med.medName+'</div>';
+        html+='<div class="final-med-details">'+med.route+' | '+med.frequency+(med.indication?' | '+med.indication.substring(0,50):'')+'</div></div>';
+        html+='<div class="final-med-actions">';
+        html+='<button onclick="moveMed(\''+med.id+'\',-1)">▲</button>';
+        html+='<button onclick="moveMed(\''+med.id+'\','+1+')">▼</button>';
+        html+='<button onclick="openEditModal(\''+med.id+'\')">Edit</button>';
+        html+='<button onclick="deleteMed(\''+med.id+'\')">Del</button>';
+        html+='</div></div>';
+      });
+      list.innerHTML = html;
+    });
+  }
+
+  function moveMed(id,dir){
+    var med = finalMedList.find(m=>String(m.id)===String(id));
+    if (!med) return;
+    var catMeds = finalMedList.filter(m=>m.category===med.category).sort((a,b)=>a.sortOrder-b.sortOrder);
+    var idx = catMeds.findIndex(m=>String(m.id)===String(id));
+    var newIdx = idx+dir;
+    if (newIdx<0 || newIdx>=catMeds.length) return;
+    var other = catMeds[newIdx];
+    var tmp = med.sortOrder;
+    med.sortOrder = other.sortOrder;
+    other.sortOrder = tmp;
+    renderFinalList();
+  }
+
+  function drag(e,id){ draggedItem=id; }
+  function allowDrop(e){ e.preventDefault(); }
+  function drop(e,category){
+    e.preventDefault();
+    var med = finalMedList.find(m=>String(m.id)===String(draggedItem));
+    if (!med) return;
+    if (med.category!==category) {
+      var oldCat = med.category;
+      med.category = category;
+      med.sortOrder = finalMedList.filter(m=>m.category===category).length;
+      var oldMeds = finalMedList.filter(m=>m.category===oldCat).sort((a,b)=>a.sortOrder-b.sortOrder);
+      oldMeds.forEach((m,i)=>m.sortOrder=i+1);
+    }
+    draggedItem=null;
+    renderFinalList();
+  }
+
+  function openEditModal(id){
+    var med = finalMedList.find(m=>String(m.id)===String(id));
+    if (!med) return;
+    editingId=id;
+    document.getElementById('editMedName').value = med.medName||'';
+    document.getElementById('editDose').value = med.dose||'';
+    document.getElementById('editRoute').value = med.route||'PO';
+    document.getElementById('editFrequency').value = med.frequency||'Daily';
+    document.getElementById('editCategory').value = med.category;
+    document.getElementById('editInstructions').value = med.indication||med.instructions||'';
+    document.getElementById('editModal').classList.add('active');
+  }
+  function closeEditModal(){ document.getElementById('editModal').classList.remove('active'); editingId=null; }
+
+  function saveEdit(){
+    var med = finalMedList.find(m=>String(m.id)===String(editingId));
+    if (!med) { closeEditModal(); return; }
+    var oldCat = med.category;
+    med.medName = document.getElementById('editMedName').value;
+    med.dose = document.getElementById('editDose').value;
+    med.route = document.getElementById('editRoute').value;
+    med.frequency = document.getElementById('editFrequency').value;
+    med.category = document.getElementById('editCategory').value;
+    med.indication = document.getElementById('editInstructions').value;
+    med.instructions = med.indication;
+
+    if (med.category!==oldCat){
+      med.sortOrder = finalMedList.filter(m=>m.category===med.category).length;
+      var oldMeds = finalMedList.filter(m=>m.category===oldCat).sort((a,b)=>a.sortOrder-b.sortOrder);
+      oldMeds.forEach((m,i)=>m.sortOrder=i+1);
+    }
+    closeEditModal();
+    renderFinalList();
+  }
+
+  function deleteMed(id){
+    if (!confirm('Remove this medication from final list?')) return;
+    var idx = finalMedList.findIndex(m=>String(m.id)===String(id));
+    if (idx<0) return;
+    var cat = finalMedList[idx].category;
+    finalMedList.splice(idx,1);
+    var catMeds = finalMedList.filter(m=>m.category===cat).sort((a,b)=>a.sortOrder-b.sortOrder);
+    catMeds.forEach((m,i)=>m.sortOrder=i+1);
+    renderFinalList();
+  }
+
+  function openExportModal(){
+    if (!finalMedList.length){ alert('No final list yet'); return;}
+    var date = new Date().toLocaleDateString();
+    var text = 'MEDICATION RECONCILIATION\nDate: '+date+'\n'+ '='.repeat(60)+'\n\n';
+    ['Continue Taking','Start Taking','Stop Taking'].forEach(function(cat){
+      var meds = finalMedList.filter(m=>m.category===cat).sort((a,b)=>a.sortOrder-b.sortOrder);
+      text += cat.toUpperCase()+'\n'+ '-'.repeat(40)+'\n';
+      if (!meds.length) text+='  (None)\n';
+      else meds.forEach(function(m,i){
+        text += (i+1)+')   '+m.medName+' '+m.route+' '+m.frequency+'\n';
+        if (m.indication) text+='     Indication: '+m.indication+'\n';
+      });
+      text+='\n';
+    });
+    document.getElementById('exportText').value = text;
+    document.getElementById('exportModal').classList.add('active');
+  }
+  function closeExportModal(){ document.getElementById('exportModal').classList.remove('active'); }
+  function copyExport(){
+    var ta=document.getElementById('exportText'); ta.select();
+    document.execCommand('copy'); alert('Copied to clipboard');
+  }
+
+  // Word-wrap helper
+  function wrapText(text, maxLen) {
+    var words = text.split(/\s+/);
+    var lines = [];
+    var current = '';
+    words.forEach(function(w){
+      if (!current.length) current = w;
+      else if ((current + ' ' + w).length <= maxLen) current += ' ' + w;
+      else { lines.push(current); current = w; }
+    });
+    if (current.length) lines.push(current);
+    return lines;
+  }
+
+  // CPRS-style Active export
+  function openExportActiveModal(){
+    var active = finalMedList.filter(m=>m.category==='Continue Taking' || m.category==='Start Taking')
+      .sort(function(a,b){
+        if (a.category!==b.category) return a.category==='Continue Taking'?-1:1;
+        return a.sortOrder-b.sortOrder;
+      });
+
+    var header = '     Active Medications                                  Status';
+    var sep    = ' ' + '='.repeat(73);
+    var text   = header + '\n' + sep + '\n';
+
+    var numColWidth     = 4;   // "1)  "
+    var statusColStart  = 63;  // where "ACTIVE" begins
+    var medStartCol     = numColWidth;
+    var maxFirstLineLen = statusColStart - medStartCol;
+
+    active.forEach(function(m, index){
+      var num    = (index + 1) + ')';
+      var numCol = num.padEnd(numColWidth, ' ');
+      var medText = m.medName + ' ' + m.route + ' ' + m.frequency;
+
+      var medLines = wrapText(medText, maxFirstLineLen);
+
+      var firstMed = medLines[0] || '';
+      var medLen   = firstMed.length;
+      var spaces   = statusColStart - (medStartCol + medLen);
+      if (spaces < 1) spaces = 1;
+
+      text += numCol + firstMed + ' '.repeat(spaces) + 'ACTIVE\n';
+
+      for (var i = 1; i < medLines.length; i++) {
+        text += '     ' + medLines[i] + '\n';
+      }
+
+      if (m.indication && m.indication.trim()) {
+        text += '     Indication: ' + m.indication.trim() + '\n';
+      }
+    });
+
+    document.getElementById('exportActiveText').value = text;
+    document.getElementById('exportActiveModal').classList.add('active');
+  }
+  function closeExportActiveModal(){ document.getElementById('exportActiveModal').classList.remove('active'); }
+  function copyExportActive(){
+    var ta=document.getElementById('exportActiveText'); ta.select();
+    document.execCommand('copy'); alert('Copied to clipboard');
+  }
+
+  function clearFinalList(){
+    if (!confirm('Clear final medication list?')) return;
+    finalMedList=[]; renderFinalList();
+  }
+  function clearAll(){
+    if (!confirm('Clear ALL data?')) return;
+    inpatientMeds=[];outpatientMeds=[];additionalMeds=[];finalMedList=[];
+    document.getElementById('inpatientPaste').value='';
+    document.getElementById('outpatientPaste').value='';
+    renderMedList('inpatient');renderMedList('outpatient');renderMedList('additional');
+    renderFinalList();
+  }
+
+  // initial render
+  renderMedList('inpatient');
+  renderMedList('outpatient');
+  renderMedList('additional');
+  renderFinalList();
+</script>
+
+</body></html>
