@@ -520,6 +520,14 @@
     var currentText = '';
 
     lines.forEach(function(line) {
+      // Skip separator lines and "Total Medications" lines
+      var trimmed = line.trim();
+      if (!trimmed || 
+          /^[-=]+$/.test(trimmed) || 
+          /total medications/i.test(trimmed)) {
+        return;
+      }
+
       var match = line.match(/^\s*(\d+)\)\s+(.+)/);
       if (match) {
         if (currentMed !== null) meds.push(parseMedLine(currentText, meds.length));
