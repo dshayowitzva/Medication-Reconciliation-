@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<!-- saved from url=(0158)file:///C:/Users/VHABYNShayoD/OneDrive%20-%20Department%20of%20Veterans%20Affairs/Microsoft%20Teams%20Chat%20Files/VA%20med%20rec%20app%20version%201%201.html -->
-<html lang="en"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-  
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
   <title>VA Medication Reconciliation</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <style>
     * { box-sizing: border-box; font-family: "Segoe UI", Tahoma, sans-serif; }
     body { margin: 0; padding: 20px; background: #f0f0f0; }
@@ -238,24 +238,24 @@
     <div class="column">
       <div class="column-header outpatient">
         <span>Outpatient Meds</span>
-        <button onclick="parseMeds(&#39;outpatient&#39;)">Parse Meds</button>
+        <button onclick="parseMeds('outpatient')">Parse Meds</button>
       </div>
       <div class="paste-area">
         <textarea id="outpatientPaste" placeholder="Paste OUTPATIENT list (1) MED ...)"></textarea>
       </div>
-      <div class="med-list" id="outpatientList"><div class="empty-state"><div class="empty-state-icon">📋</div>No medications parsed yet</div></div>
+      <div class="med-list" id="outpatientList"></div>
     </div>
 
     <!-- INPATIENT -->
     <div class="column">
       <div class="column-header inpatient">
         <span>Inpatient Meds</span>
-        <button onclick="parseMeds(&#39;inpatient&#39;)">Parse Meds</button>
+        <button onclick="parseMeds('inpatient')">Parse Meds</button>
       </div>
       <div class="paste-area">
         <textarea id="inpatientPaste" placeholder="Paste INPATIENT list (1) MED ...)"></textarea>
       </div>
-      <div class="med-list" id="inpatientList"><div class="empty-state"><div class="empty-state-icon">📋</div>No medications parsed yet</div></div>
+      <div class="med-list" id="inpatientList"></div>
     </div>
 
     <!-- ADDITIONAL -->
@@ -303,11 +303,13 @@
             <option value="Q6H">Q6H</option>
             <option value="Q8H">Q8H</option>
             <option value="Q12H">Q12H</option>
+            <option value="Q48H">Q48H</option>
             <option value="Q72H">Q72H</option>
             <option value="QHS">QHS</option>
             <option value="PRN">PRN</option>
             <option value="Weekly">Weekly</option>
             <option value="Once">Once</option>
+	    <option value="See Instructions">See Instructions</option>
           </select>
         </div>
         <div class="form-row">
@@ -316,13 +318,13 @@
         </div>
         <button class="btn-add-med" onclick="addAdditionalMed()">+ Add Medication</button>
       </div>
-      <div class="med-list" id="additionalList"><div class="empty-state"><div class="empty-state-icon">📋</div>No medications parsed yet</div></div>
+      <div class="med-list" id="additionalList"></div>
     </div>
   </div>
 
   <div class="action-bar">
     <button class="btn-match" onclick="matchMeds()">Match Similar Meds</button>
-    <button class="btn-continue" onclick="addToFinal(&#39;Continue Taking&#39;)">Add Selected → Continue</button>
+    <button class="btn-continue" onclick="addToFinal('Continue Taking')">Add Selected → Continue</button>
     <button class="btn-generate" onclick="generateFinalList()">Generate Final List</button>
   </div>
 
@@ -360,7 +362,10 @@
           <span>Continue Taking</span>
           <span id="continueCount">0 medications</span>
         </div>
-        <div class="category-list" id="continueList" ondragover="allowDrop(event)" ondrop="drop(event,&#39;Continue Taking&#39;)"><div class="empty-state"><div class="empty-state-icon">💊</div>No medications added yet</div></div>
+        <div class="category-list" id="continueList"
+             ondragover="allowDrop(event)" ondrop="drop(event,'Continue Taking')">
+          <div class="empty-state"><div class="empty-state-icon">💊</div>No medications added yet</div>
+        </div>
       </div>
 
       <div class="category">
@@ -368,7 +373,10 @@
           <span>Start Taking</span>
           <span id="startCount">0 medications</span>
         </div>
-        <div class="category-list" id="startList" ondragover="allowDrop(event)" ondrop="drop(event,&#39;Start Taking&#39;)"><div class="empty-state"><div class="empty-state-icon">💊</div>No medications added yet</div></div>
+        <div class="category-list" id="startList"
+             ondragover="allowDrop(event)" ondrop="drop(event,'Start Taking')">
+          <div class="empty-state"><div class="empty-state-icon">💊</div>No medications added yet</div>
+        </div>
       </div>
 
       <div class="category">
@@ -376,7 +384,10 @@
           <span>Stop Taking</span>
           <span id="stopCount">0 medications</span>
         </div>
-        <div class="category-list" id="stopList" ondragover="allowDrop(event)" ondrop="drop(event,&#39;Stop Taking&#39;)"><div class="empty-state"><div class="empty-state-icon">💊</div>No medications added yet</div></div>
+        <div class="category-list" id="stopList"
+             ondragover="allowDrop(event)" ondrop="drop(event,'Stop Taking')">
+          <div class="empty-state"><div class="empty-state-icon">💊</div>No medications added yet</div>
+        </div>
       </div>
     </div>
   </div>
@@ -464,7 +475,7 @@
       <button class="modal-close" onclick="closeExportModal()">×</button>
     </div>
     <div class="modal-body">
-      <textarea id="exportText" class="export-textarea" readonly=""></textarea>
+      <textarea id="exportText" class="export-textarea" readonly></textarea>
     </div>
     <div class="modal-footer">
       <button class="btn-modal-cancel" onclick="closeExportModal()">Close</button>
@@ -481,7 +492,7 @@
       <button class="modal-close" onclick="closeExportActiveModal()">×</button>
     </div>
     <div class="modal-body">
-      <textarea id="exportActiveText" class="export-textarea" readonly=""></textarea>
+      <textarea id="exportActiveText" class="export-textarea" readonly></textarea>
     </div>
     <div class="modal-footer">
       <button class="btn-modal-cancel" onclick="closeExportActiveModal()">Close</button>
@@ -1115,5 +1126,5 @@
   renderMedList('additional');
   renderFinalList();
 </script>
-
-</body></html>
+</body>
+</html>
